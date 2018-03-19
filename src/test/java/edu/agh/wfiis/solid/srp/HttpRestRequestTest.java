@@ -1,6 +1,7 @@
 package edu.agh.wfiis.solid.srp;
 
 
+import edu.agh.wfiis.solid.srp.model.InvalidHeaderException;
 import edu.agh.wfiis.solid.srp.model.Message;
 import edu.agh.wfiis.solid.srp.model.raml.Constraints;
 import edu.agh.wfiis.solid.srp.model.raml.Header;
@@ -26,6 +27,12 @@ public class HttpRestRequestTest {
         testMessage.setInboundProperty("http.headers", new HashMap<String, String>() {{
             put(CONTENT_TYPE_HEADER_NAME, "application/json");
         }});
+        new HttpRestRequest(testMessage).validate(VALIDATION_CONTRACT);
+    }
+
+    @org.junit.Test(expected = InvalidHeaderException.class)
+    public void validate1() throws InvalidHeaderException {
+        testMessage.setInboundProperty("http.headers", new HashMap<String, String>());
         new HttpRestRequest(testMessage).validate(VALIDATION_CONTRACT);
     }
 

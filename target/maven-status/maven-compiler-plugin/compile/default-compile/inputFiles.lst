@@ -1,0 +1,5 @@
+/Users/marynaproskurnia/IdeaProjects/single-responsibility-principle/src/main/java/edu/agh/wfiis/solid/srp/model/InvalidHeaderException.java
+/Users/marynaproskurnia/IdeaProjects/single-responsibility-principle/src/main/java/edu/agh/wfiis/solid/srp/model/raml/Header.java
+/Users/marynaproskurnia/IdeaProjects/single-responsibility-principle/src/main/java/edu/agh/wfiis/solid/srp/model/Message.java
+/Users/marynaproskurnia/IdeaProjects/single-responsibility-principle/src/main/java/edu/agh/wfiis/solid/srp/HttpRestRequest.java
+/Users/marynaproskurnia/IdeaProjects/single-responsibility-principle/src/main/java/edu/agh/wfiis/solid/srp/model/raml/Constraints.java
