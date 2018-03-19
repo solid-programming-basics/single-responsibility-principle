@@ -1,0 +1,5 @@
+edu/agh/wfiis/solid/srp/HttpRestRequest.class
+edu/agh/wfiis/solid/srp/model/raml/Header.class
+edu/agh/wfiis/solid/srp/model/InvalidHeaderException.class
+edu/agh/wfiis/solid/srp/model/raml/Constraints.class
+edu/agh/wfiis/solid/srp/model/Message.class

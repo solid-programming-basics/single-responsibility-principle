@@ -10,8 +10,8 @@ public class Header {
 
     private String displayName;
 
-    public boolean validate(String incomingValue) {
-        return pattern == null? true: pattern.matches(incomingValue);
+    public boolean isMatchToPattern(String incomingValue) {
+        return pattern == null || pattern.matches(incomingValue);
     }
 
     public boolean isRequired() {

@@ -7,54 +7,78 @@ import edu.agh.wfiis.solid.srp.model.raml.Header;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class HttpRestRequest {
 
-    protected Message requestMessage;
-    protected Constraints validationConstraints;
+    private Message requestMessage;
 
-    public HttpRestRequest(Message requestMessage) {
+    HttpRestRequest(Message requestMessage) {
         this.requestMessage = requestMessage;
     }
 
-    public Message validate(Constraints validationConstraints) throws InvalidHeaderException {
-        this.validationConstraints = validationConstraints;
-        processHeaders();
-        return requestMessage;
+    public void validate(Constraints validationConstraints) throws InvalidHeaderException {
+        validateHeaders(validationConstraints);
     }
 
-    private void processHeaders() throws InvalidHeaderException {
-        for (String expectedKey : validationConstraints.getHeaders().keySet()) {
-            Header expected = (Header) validationConstraints.getHeaders().get(expectedKey);
-            Map<String, String> incomingHeaders = getIncomingHeaders(requestMessage);
+    private void validateHeaders(Constraints validationConstraints) throws InvalidHeaderException {
+        Map<String, Header> expectedHeaders = validationConstraints.getHeaders();
+        Set<String> expectedHeadersKeySet = expectedHeaders.keySet();
+        Map<String, String> incomingHeaders = getIncomingHeaders(requestMessage);
 
-            String actual = (String) incomingHeaders.get(expectedKey);
-            if ((actual == null) && (expected.isRequired())) {
-                throw new InvalidHeaderException("Required header " + expectedKey + " not specified");
-            }
-            if ((actual == null) && (expected.getDefaultValue() != null)) {
-                setHeader(expectedKey, expected.getDefaultValue());
-            }
-            if (actual != null) {
-                if (!expected.validate(actual)) {
-                    String msg = String.format("Invalid value '%s' for header %s.", new Object[]{actual, expected});
-                    throw new InvalidHeaderException(msg);
-                }
-            }
+        for (String expectedKey : expectedHeadersKeySet) {
+            Header expectedHeader = expectedHeaders.get(expectedKey);
+            String actualHeaderValue = incomingHeaders.get(expectedKey);
+
+            checkIfRequiredHeaderValueSpecified(expectedKey, expectedHeader, actualHeaderValue);
+            checkIfHeaderDefaultValueSpecified(requestMessage, expectedKey, expectedHeader, actualHeaderValue);
+            checkIfHeaderValueMatchesPattern(expectedHeader, actualHeaderValue);
         }
     }
 
-    private void setHeader(String key, String value) {
-        if (requestMessage.getInboundProperty("http.headers") != null) {
-            ((Map) requestMessage.getInboundProperty("http.headers")).put(key, value);
+    private void checkIfHeaderValueMatchesPattern(Header expectedHeader, String actualHeaderValue) throws InvalidHeaderException {
+        if ((actualHeaderValue != null) && (!expectedHeader.isMatchToPattern(actualHeaderValue))) {
+            String msg = String.format("Invalid value '%s' for header %s.", actualHeaderValue, expectedHeader);
+            throw new InvalidHeaderException(msg);
         }
+    }
+
+    private void checkIfHeaderDefaultValueSpecified(Message requestMessage, String expectedKey, Header expected, String actual) {
+        if ((actual == null) && (expected.getDefaultValue() != null)) {
+            setHeader(requestMessage, expectedKey, expected.getDefaultValue());
+        }
+        // what's about no actual value && no default one? Would it be optional?
+    }
+
+    private void checkIfRequiredHeaderValueSpecified(String expectedKey, Header expected, String actual) throws InvalidHeaderException {
+        if ((actual == null) && (expected.isRequired())) {
+            throw new InvalidHeaderException("Required header " + expectedKey + " not specified");
+        }
+    }
+
+    private void setHeader(Message requestMessage, String key, String value) {
+        requestMessage.setInboundProperty(key, value);
+//          was:
+//        if (requestMessage.getInboundProperty("http.headers") != null) {
+//            ((Map) requestMessage.getInboundProperty("http.headers")).put(key, value);
+//        }
     }
 
     private Map<String, String> getIncomingHeaders(Message message) {
         Map<String, String> incomingHeaders = new HashMap<>();
-        if (message.getInboundProperty("http.headers") != null) {
-            incomingHeaders = message.<Map>getInboundProperty("http.headers");
+        try {
+            incomingHeaders = message.getInboundProperty("http.headers");
+        } catch (NullPointerException ex) {
+            ex.getStackTrace();
         }
         return incomingHeaders;
     }
+
+//    public static void main(String[] args) {
+//        Message message = null;
+//        HttpRestRequest request = new HttpRestRequest(message);
+//        Map<String, String> incomingHeaders = request.getIncomingHeaders(message);
+//        System.out.println(incomingHeaders);
+//
+//    }
 }
