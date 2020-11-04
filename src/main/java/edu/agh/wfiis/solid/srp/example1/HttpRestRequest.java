@@ -36,9 +36,10 @@ public class HttpRestRequest {
     }
 
 
-    public void setMissingHeadersToDefault(Constraints constraints){
+    public MuleMessage getMuleMessageWithMissingHeadersChangedToDefault(Constraints constraints){
         for (Constraint constraint : constraints.getHeaderConstraints())
             setMissingHeaderToDefault(constraint);
+        return muleMessage;
     }
 
     @Deprecated
