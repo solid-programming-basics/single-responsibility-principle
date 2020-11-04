@@ -59,7 +59,7 @@ public class HttpRestRequest {
 
         final HeaderValidationResult validationResult = validateMuleMessageHeaders(muleMessage, validationConstraints);
         System.out.println(validationResult.getStringifiedHeaderValidationErrorByHeaderName());
-        if(validationResult.isValidationPassed()) throw new InvalidHeaderException(validationResult.getValidationError(0).getError());
+        if(!validationResult.isValidationPassed()) throw new InvalidHeaderException(validationResult.getValidationError(0).getError());
 
         Map<String, String> defaultHeaderValuesByHeaderNames = validationConstraints.getHeaderConstraints().stream().collect(Collectors.toMap(Constraint::getHeaderName, Constraint::getDefaultValue));
         setMissingHeadersDefaultValuesInMuleMessage(muleMessage, defaultHeaderValuesByHeaderNames);
