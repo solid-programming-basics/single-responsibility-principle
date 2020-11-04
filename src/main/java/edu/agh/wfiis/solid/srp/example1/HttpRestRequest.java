@@ -14,31 +14,13 @@ import java.util.stream.Collectors;
 
 public class HttpRestRequest {
 
-    protected MuleMessage muleMessage;
-    protected Constraints validationConstraints;
+    public HttpRestRequest(){ }
 
-    public HttpRestRequest(MuleMessage muleMessage) {
-        this.muleMessage = muleMessage;
-    }
-
-    public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
-        this.validationConstraints = validationConstraints;
-
-        final List<HeaderValidationError> validationErrors = validateMuleMessageHeaders(muleMessage, validationConstraints);
-        System.out.println(validationErrors.stream().map(HeaderValidationError::getError).collect(Collectors.joining("\n"))); // pomyslec czy jednak nie opakowac errorow w klase i tam zrobic summarize czy cos
-        if(!validationErrors.isEmpty()) throw new InvalidHeaderException(validationErrors.get(0).getError());
-
-        Map<String, String> defaultHeaderValuesByHeaderNames = validationConstraints.getHeaderConstraints().stream().collect(Collectors.toMap(Constraint::getHeaderName, Constraint::getDefaultValue));
-        setMissingHeadersDefaultValueInMuleMassageClassField(defaultHeaderValuesByHeaderNames);
-
-        return muleMessage;
-    }
-
-    private List<HeaderValidationError> validateMuleMessageHeaders(MuleMessage muleMessage, Constraints headerValidationConstraints){
+    public HeaderValidationResult validateMuleMessageHeaders(MuleMessage muleMessage, Constraints headerValidationConstraints){
         BiPredicate<String, Constraint> isRequiredHeaderMissing = (headerValue, constraint) -> headerValue == null && constraint.isHeaderRequired();
         BiPredicate<String, Constraint> isExistingHeaderValueInvalid = (headerValue, constraint) -> headerValue != null && (!constraint.validate(headerValue));
 
-        return headerValidationConstraints.getHeaderConstraints().stream().map(constraint -> {
+        return HeaderValidationResult.ofList(headerValidationConstraints.getHeaderConstraints().stream().map(constraint -> {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
 
@@ -49,20 +31,57 @@ public class HttpRestRequest {
                 return new InvalidHeaderValueError(headerName, headerValue);
             }
             return null;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList()));
     }
 
 
-    private void setMissingHeadersDefaultValueInMuleMassageClassField(Map<String, String> defaultHeaderValuesByHeaderNames){
+    /**
+     * @param muleMessage - WARNING this argument will be modified by the function
+     * Usage of output argument is forced by MuleMessage API - MuleMessage does not allow to easily clone instance.
+     */
+    public void setMissingHeadersDefaultValuesInMuleMessage(MuleMessage muleMessage, Map<String, String> defaultHeaderValuesByHeaderNames){
         BiPredicate<String, String> shouldSetDefaultHeaderValue = (headerValue, defaultHeaderValue) -> headerValue == null && defaultHeaderValue != null;
 
         defaultHeaderValuesByHeaderNames.entrySet().stream()
                 .filter(entry -> shouldSetDefaultHeaderValue.test(muleMessage.getHeader(entry.getKey()), entry.getValue()))
                 .forEach(entry -> muleMessage.setHeader(entry.getKey(), entry.getValue()));
     }
+
+    /**
+     * this method is deprecated as it violates SRP
+     * to get similar effect using new API use:
+     * httpRestRequest.validateMuleMessageHeaders(muleMessage, headerValidationConstraints);
+     * httpRestRequest.setMissingHeadersDefaultValuesInMuleMessage(muleMessage, defaultHeaderValuesByHeaderNames);
+     */
+    @Deprecated
+    public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
+        this.validationConstraints = validationConstraints;
+
+        final HeaderValidationResult validationResult = validateMuleMessageHeaders(muleMessage, validationConstraints);
+        System.out.println(validationResult.getStringifiedHeaderValidationErrorByHeaderName());
+        if(validationResult.isValidationPassed()) throw new InvalidHeaderException(validationResult.getValidationError(0).getError());
+
+        Map<String, String> defaultHeaderValuesByHeaderNames = validationConstraints.getHeaderConstraints().stream().collect(Collectors.toMap(Constraint::getHeaderName, Constraint::getDefaultValue));
+        setMissingHeadersDefaultValuesInMuleMessage(muleMessage, defaultHeaderValuesByHeaderNames);
+
+        return muleMessage;
+    }
+
+
+    @Deprecated
+    protected MuleMessage muleMessage;
+
+    @Deprecated
+    protected Constraints validationConstraints;
+
+    @Deprecated
+    public HttpRestRequest(MuleMessage muleMessage) {
+        this.muleMessage = muleMessage;
+    }
 }
 
 interface HeaderValidationError{
+    String getHeaderName();
     String getError();
 }
 
@@ -72,6 +91,11 @@ class RequiredHeaderMissingError implements HeaderValidationError{
 
     public RequiredHeaderMissingError(String headerName){
         this.headerName = headerName;
+    }
+
+    @Override
+    public String getHeaderName() {
+        return headerName;
     }
 
     @Override
@@ -91,7 +115,42 @@ class InvalidHeaderValueError implements  HeaderValidationError{
     }
 
     @Override
+    public String getHeaderName() {
+        return headerName;
+    }
+
+    @Override
     public String getError() {
         return MessageFormat.format("Invalid value {0} format for header {1}.",headerValue, headerName);
     }
+}
+
+class HeaderValidationResult {
+    private final List<HeaderValidationError> validationErrors;
+
+    public static HeaderValidationResult ofList(List<HeaderValidationError> validationErrors){
+        return new HeaderValidationResult(validationErrors);
+    }
+
+    private HeaderValidationResult(List<HeaderValidationError> validationErrors){
+        this.validationErrors = validationErrors;
+    }
+
+    public boolean isValidationPassed(){
+        return validationErrors.isEmpty();
+    }
+
+    public HeaderValidationError getValidationError(int index){
+        if(index>=validationErrors.size()) throw new IndexOutOfBoundsException();
+        return validationErrors.get(index);
+    }
+
+    public String getStringifiedHeaderValidationErrorByHeaderName(){
+        return validationErrors.stream().map(error -> error.getHeaderName() + ": " + error.getError()).collect(Collectors.joining("\n"));
+    }
+
+    public Map<String, HeaderValidationError> getHeaderValidationErrorByHeaderName(){
+        return validationErrors.stream().collect(Collectors.toMap(HeaderValidationError::getHeaderName, error->error));
+    }
+
 }
