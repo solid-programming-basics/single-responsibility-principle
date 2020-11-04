@@ -63,13 +63,17 @@ public class HttpRestRequest {
 abstract class HeaderValidationError {
     protected String headerName;
 
+    HeaderValidationError(String headerName) {
+        this.headerName = headerName;
+    }
+
     abstract public String getErrorMessage();
 }
 
 class MissingHeader extends HeaderValidationError {
 
     public MissingHeader(String headerName) {
-        this.headerName = headerName;
+        super(headerName);
     }
 
     @Override
@@ -82,7 +86,7 @@ class InvalidValueFormatInHeader extends HeaderValidationError {
     private String headerValue;
 
     public InvalidValueFormatInHeader(String headerName, String headerValue) {
-        this.headerName = headerName;
+        super(headerName);
         this.headerValue = headerValue;
     }
 
