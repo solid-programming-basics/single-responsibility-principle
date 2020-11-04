@@ -21,27 +21,28 @@ public class HttpRestRequest {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
     
-            validateHeader(constraint, headerValue);
-            setMissingHeaderValueToDefault(headerName, constraint);
+            validateHeader(constraint, headerValue, headerName);
+            setMissingHeaderValueToDefault(constraint, headerValue, headerName);
         }
 
         return muleMessage;
     }
 
-    private void setMissingHeaderValueToDefault(String headerName, Constraint constraint) {
+    private void setMissingHeaderValueToDefault(Constraint constraint, String headerValue, String headerName) {
         if (headerValue == null && constraint.getDefaultValue() != null) 
             muleMessage.setHeader(headerName, constraint.getDefaultValue());
     }
 
-    private void validateHeader(Constraint constraint, String headerValue) throws InvalidHeaderException {
+    private void validateHeader(Constraint constraint, String headerValue, String headerName) throws InvalidHeaderException {
+        String missingErrorMsg = String.format("Required header is not specified: %s", headerName);
+        String invalidValueMsg = String.format("Invalid value format for header: %s", headerName);
+
         if (headerValue == null) {
-            String errorMsg = String.format("Required header is not specified: %s", headerName);
             if (constraint.isHeaderRequired() && constraint.isHeaderRequired())
-                throw new InvalidHeaderException(errorMsg);
+                throw new InvalidHeaderException(missingErrorMsg);
         } else {
-            String errorMsg = String.format("Invalid value format for header: %s", headerName);
             if (!constraint.validate(headerValue))
-                throw new InvalidHeaderException(errorMsg);
+                throw new InvalidHeaderException(invalidValueMsg);
         }
     }
 
@@ -50,7 +51,8 @@ public class HttpRestRequest {
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
-            validateHeader(constraint, headerValue);
+            
+            validateHeader(constraint, headerValue, headerName);
         }
     }
 
@@ -58,7 +60,8 @@ public class HttpRestRequest {
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
-            setMissingHeaderValueToDefault(headerName, constraint);
+
+            setMissingHeaderValueToDefault(constraint, headerValue, headerName);
         }
     }
 }
