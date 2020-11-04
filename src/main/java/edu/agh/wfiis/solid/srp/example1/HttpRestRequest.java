@@ -29,8 +29,9 @@ public class HttpRestRequest {
     }
 
     private void setMissingHeaderValueToDefault(Constraint constraint, String headerValue, String headerName) {
-        if (headerValue == null && constraint.getDefaultValue() != null) 
+        if (headerValue == null && constraint.getDefaultValue() != null) {
             muleMessage.setHeader(headerName, constraint.getDefaultValue());
+        } 
     }
 
     private void validateHeader(Constraint constraint, String headerValue, String headerName) throws InvalidHeaderException {
@@ -38,11 +39,14 @@ public class HttpRestRequest {
         String invalidValueMsg = String.format("Invalid value format for header: %s", headerName);
 
         if (headerValue == null) {
-            if (constraint.isHeaderRequired() && constraint.isHeaderRequired())
+            if (constraint.isHeaderRequired() && constraint.isHeaderRequired()) {
                 throw new InvalidHeaderException(missingErrorMsg);
+            }
         } else {
-            if (!constraint.validate(headerValue))
+            // check if value is correct
+            if (!constraint.validate(headerValue)) {
                 throw new InvalidHeaderException(invalidValueMsg);
+            }
         }
     }
 
@@ -51,7 +55,7 @@ public class HttpRestRequest {
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
-            
+
             validateHeader(constraint, headerValue, headerName);
         }
     }
