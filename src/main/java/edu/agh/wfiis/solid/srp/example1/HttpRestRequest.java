@@ -17,11 +17,39 @@ public class HttpRestRequest {
         this.muleMessage = muleMessage;
     }
 
+    public ValidationResults validateHeaders(Constraints validationConstraints) {
+        return assertHeadersMeetConstraints(validationConstraints);
+    }
+
     @Deprecated()
     public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
-        assertHeadersMeetConstraints(validationConstraints);
-        setMissingHeadersToDefaultInternal(validationConstraints);
+        processHeaders(validationConstraints);
         return muleMessage;
+    }
+
+    public void setMissingHeadersToDefault(Constraints validationConstraints){
+        setMissingHeadersToDefaultInternal(validationConstraints);
+    }
+
+    private void processHeaders(Constraints validationConstraints) throws InvalidHeaderException {
+        for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
+            String headerName = constraint.getHeaderName();
+            String headerValue = muleMessage.getHeader(headerName);
+
+            if (headerValue == null && constraint.isHeaderRequired()) {
+                throw new InvalidHeaderException("Required header " + headerName + " not specified");
+            }
+
+            if (headerValue == null && constraint.getDefaultValue() != null) {
+                muleMessage.setHeader(headerName, constraint.getDefaultValue());
+            }
+
+            if (headerValue != null) {
+                if (!constraint.validate(headerValue)) {
+                    throw new InvalidHeaderException(MessageFormat.format("Invalid value format for header {0}.", headerName));
+                }
+            }
+        }
     }
 
     private ValidationResults assertHeadersMeetConstraints(Constraints validationConstraints) {
@@ -43,10 +71,6 @@ public class HttpRestRequest {
         }
 
         return resultsBuilder.build();
-    }
-
-    public void setMissingHeadersToDefault(Constraints validationConstraints){
-        setMissingHeadersToDefaultInternal(validationConstraints);
     }
 
     private void setMissingHeadersToDefaultInternal(Constraints validationConstraints){
