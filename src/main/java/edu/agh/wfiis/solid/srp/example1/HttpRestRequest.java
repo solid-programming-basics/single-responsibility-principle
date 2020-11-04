@@ -19,18 +19,19 @@ public class HttpRestRequest {
 
     public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
         this.validationConstraints = validationConstraints;
+        List<Constraint> headerConstraints = validationConstraints.getHeaderConstraints();
 
-        List<HeaderValidationError> headerValidationErrors = validateHeaders(validationConstraints.getHeaderConstraints());
-
-        if(!headerValidationErrors.isEmpty()) {
+        List<HeaderValidationError> headerValidationErrors = validateHeaders(headerConstraints);
+        if (!headerValidationErrors.isEmpty()) {
             throw new InvalidHeaderException(headerValidationErrors.get(0).getError());
         }
 
-        setMissingHeadersDefaultValues();
+        setMissingHeadersDefaultValues(headerConstraints);
+        
         return muleMessage;
     }
 
-    private List<HeaderValidationError> validateHeaders(Map<String, String> headerValuesByNames, List<Constraint> headerConstraints) {
+    private List<HeaderValidationError> validateHeaders(List<Constraint> headerConstraints) {
         List<HeaderValidationError> errorMessages = new ArrayList<>();
 
         for (Constraint constraint : headerConstraints) {
@@ -41,32 +42,22 @@ public class HttpRestRequest {
                 errorMessages.add(new MissingHeaderValidationError(headerName));
             }
 
-            if (headerValue != null) {
-                if (!constraint.validate(headerValue)) {
-                    errorMessages.add(new InvalidHeaderValueValidationError(headerName, headerValue));
-                }
+            if (headerValue != null && !constraint.validate(headerValue)) {
+                errorMessages.add(new InvalidHeaderValueValidationError(headerName, headerValue));
             }
         }
 
         return errorMessages;
     }
 
-    private void setMissingHeadersDefaultValuesInMessage( ){
-        for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
-            tryToSetDefaultHeaderValue(constraint,muleMessage);
+    private void setMissingHeadersDefaultValues(List<Constraint> headerConstraints) {
+        for (Constraint constraint : headerConstraints) {
+            String headerName = constraint.getHeaderName();
+            String headerDefaultValue = constraint.getDefaultValue();
+            if (muleMessage.getHeader(headerName) == null && headerDefaultValue != null) {
+                muleMessage.setHeader(headerName, headerDefaultValue);
+            }
         }
-    }
-
-    private boolean tryToSetDefaultHeaderValue(Constraint constraint, MuleMessage muleMessage){
-        if (muleMessage.getHeader(constraint.getHeaderName()) == null && constraint.getDefaultValue() != null) {
-            setDefaultHeaderValue(constraint, muleMessage);
-            return true;
-        }
-        return false;
-    }
-
-    private void setDefaultHeaderValue(Constraint constraint, MuleMessage muleMessage){
-        muleMessage.setHeader(constraint.getHeaderName(), constraint.getDefaultValue());
     }
 }
 
