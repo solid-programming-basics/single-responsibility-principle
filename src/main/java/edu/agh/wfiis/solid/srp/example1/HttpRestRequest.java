@@ -11,9 +11,13 @@ import java.util.List;
 
 public class HttpRestRequest {
 
-    public HttpRestRequest() {}
+    protected MuleMessage muleMessage;
 
-    public List<HeaderValidationError> validateHeaders(MuleMessage muleMessage, List<Constraint> headerConstraints) {
+    public HttpRestRequest(MuleMessage muleMessage) {
+        this.muleMessage = muleMessage;
+    }
+
+    public List<HeaderValidationError> validateHeaders(List<Constraint> headerConstraints) {
         List<HeaderValidationError> errorMessages = new ArrayList<>();
 
         for (Constraint constraint : headerConstraints) {
@@ -34,22 +38,15 @@ public class HttpRestRequest {
         return errorMessages;
     }
 
-    public void setMissingHeadersDefaultValues(MuleMessage muleMessage, List<Constraint> headerConstraints){
+    public void setMissingHeadersDefaultValues(List<Constraint> headerConstraints){
         for (Constraint constraint : headerConstraints) {
             setHeaderDefaultValueIfMissing(constraint, muleMessage);
         }
     }
 
     @Deprecated
-    protected MuleMessage muleMessage;
-    @Deprecated
     protected Constraints validationConstraints;
     
-    @Deprecated
-    public HttpRestRequest(MuleMessage muleMessage) {
-        this.muleMessage = muleMessage;
-    }
-
     @Deprecated
     public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
         this.validationConstraints = validationConstraints;
