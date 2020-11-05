@@ -10,27 +10,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HttpRestRequest {
-    protected MuleMessage muleMessage;
-    protected Constraints validationConstraints;
 
-    public HttpRestRequest(MuleMessage muleMessage) {
-        this.muleMessage = muleMessage;
-    }
+    public HttpRestRequest() {}
 
-    public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
-        this.validationConstraints = validationConstraints;
-
-        List<HeaderValidationError> headerValidationErrors = validateHeaders(validationConstraints.getHeaderConstraints());
-
-        if(!headerValidationErrors.isEmpty()) {
-            throw new InvalidHeaderException(headerValidationErrors.get(0).getError());
-        }
-
-        setMissingHeadersDefaultValues();
-        return muleMessage;
-    }
-
-    private List<HeaderValidationError> validateHeaders(Map<String, String> headerValuesByNames, List<Constraint> headerConstraints) {
+    public List<HeaderValidationError> validateHeaders(MuleMessage muleMessage, List<Constraint> headerConstraints) {
         List<HeaderValidationError> errorMessages = new ArrayList<>();
 
         for (Constraint constraint : headerConstraints) {
@@ -51,18 +34,40 @@ public class HttpRestRequest {
         return errorMessages;
     }
 
-    private void setMissingHeadersDefaultValuesInMessage( ){
-        for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
-            tryToSetDefaultHeaderValue(constraint,muleMessage);
+    public void setMissingHeadersDefaultValues(MuleMessage muleMessage, List<Constraint> headerConstraints){
+        for (Constraint constraint : headerConstraints) {
+            setHeaderDefaultValueIfMissing(constraint, muleMessage);
         }
     }
 
-    private boolean tryToSetDefaultHeaderValue(Constraint constraint, MuleMessage muleMessage){
+    @Deprecated
+    protected MuleMessage muleMessage;
+    @Deprecated
+    protected Constraints validationConstraints;
+    
+    @Deprecated
+    public HttpRestRequest(MuleMessage muleMessage) {
+        this.muleMessage = muleMessage;
+    }
+
+    @Deprecated
+    public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
+        this.validationConstraints = validationConstraints;
+
+        List<HeaderValidationError> headerValidationErrors = validateHeaders(muleMessage, validationConstraints.getHeaderConstraints());
+
+        if(!headerValidationErrors.isEmpty()) {
+            throw new InvalidHeaderException(headerValidationErrors.get(0).getError());
+        }
+
+        setMissingHeadersDefaultValues(muleMessage, validationConstraints.getHeaderConstraints());
+        return muleMessage;
+    }
+
+    private void setHeaderDefaultValueIfMissing(Constraint constraint, MuleMessage muleMessage){
         if (muleMessage.getHeader(constraint.getHeaderName()) == null && constraint.getDefaultValue() != null) {
             setDefaultHeaderValue(constraint, muleMessage);
-            return true;
         }
-        return false;
     }
 
     private void setDefaultHeaderValue(Constraint constraint, MuleMessage muleMessage){
