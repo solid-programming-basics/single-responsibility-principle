@@ -33,7 +33,7 @@ public class HttpRestRequest
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) 
         {
             HeaderValidationResult result = validateHeader(constraint); 
-            if (result.getCode() != 0)
+            if (result.getCode() != HeaderValidationResult.hvrOK)
                 errorList.add(result);
         }
         return errorList;
@@ -47,14 +47,14 @@ public class HttpRestRequest
         if (headerValue == null)
         {
             if (constraint.isHeaderRequired()) 
-                return new HeaderValidationResult(1, constraint);
+                return new HeaderValidationResult(HeaderValidationResult.hvrHeaderNotSpecified, constraint);
         }
         else
         {
             if (!constraint.validate(headerValue)) 
-                return new HeaderValidationResult(2, constraint);
+                return new HeaderValidationResult(HeaderValidationResult.hvrInvalidValueFormat, constraint);
         }
-        return new HeaderValidationResult(0, constraint);
+        return new HeaderValidationResult(HeaderValidationResult.hvrOK, constraint);
     }
     
     private boolean isMissingHeaderValue(String headerValue, Constraint constraint)

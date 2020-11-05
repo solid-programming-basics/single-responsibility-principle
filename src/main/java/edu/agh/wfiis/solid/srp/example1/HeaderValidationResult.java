@@ -15,6 +15,11 @@ public class HeaderValidationResult
     private String name;
     private Constraint constraint;
     
+    static final int hvrOK = 0;
+    static final int hvrHeaderNotSpecified = 1;
+    static final int hvrInvalidValueFormat = 2;
+    static final int hvrUnknown = -1;
+    
     ///tworzenie dowolnych błędów - także tych niezawartych w drugim konstroktorze
     public HeaderValidationResult(int code, String name, Constraint constraint)
     {
@@ -24,15 +29,15 @@ public class HeaderValidationResult
     ///automatyzacja już znanych błędów
     public HeaderValidationResult(int code, Constraint constraint)
     {
-        switch (code) 
+        switch (code) //tablica stałych i sprawdzanie warunku kodu w zakresie tablicy
         {
-            case 0:
+            case hvrOK:
                 setValues(code, "OK", constraint); 
                 break;
-            case 1: 
+            case hvrHeaderNotSpecified: 
                 setValues(code, "Required header not specified", constraint);
                 break;
-            case 2:
+            case hvrInvalidValueFormat:
                 setValues(code, "Invalid value format for the header", constraint); 
                 break;
             default:

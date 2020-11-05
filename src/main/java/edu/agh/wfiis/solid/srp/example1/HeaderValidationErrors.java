@@ -16,6 +16,7 @@ public class HeaderValidationErrors extends InvalidHeaderException
     public HeaderValidationErrors(String s)
     {
         super(s);
+        errorList = null;
     }
         
     public static HeaderValidationErrors create(List<HeaderValidationResult> errorList)
