@@ -33,7 +33,6 @@ public class HttpRestRequest {
                 muleMessage.setHeader(headerName, constraint.getDefaultValue());
             }
         }
-
     }
 
     private boolean validateHeaderValues(String incomingValue, Constraint constraint) {
