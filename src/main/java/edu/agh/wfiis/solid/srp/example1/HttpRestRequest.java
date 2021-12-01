@@ -16,14 +16,12 @@ public class HttpRestRequest {
         this.muleMessage = muleMessage;
     }
 
-    public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
+    public void validate(Constraints validationConstraints) throws InvalidHeaderException {
         this.validationConstraints = validationConstraints;
         validateHeaders();
-        setDefaultHeaders(muleMessage);
-        return muleMessage;
     }
 
-    private void setDefaultHeaders(MuleMessage muleMessage) {
+    public void setMissingHeadersToDefault(Constraints validationConstraints) {
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
@@ -35,7 +33,7 @@ public class HttpRestRequest {
 
     }
 
-    public boolean validateHeaderValues(String incomingValue, Constraint constraint) {
+    private boolean validateHeaderValues(String incomingValue, Constraint constraint) {
         return constraint.getPattern() == null ? true : constraint.getPattern().matches(incomingValue);
     }
 
@@ -48,10 +46,8 @@ public class HttpRestRequest {
                 throw new InvalidHeaderException("Required header " + headerName + " not specified");
             }
 
-            if (headerValue != null) {
-                if (!validateHeaderValues(headerValue, constraint)) {
-                    throw new InvalidHeaderException(MessageFormat.format("Invalid value format for header {0}.", headerName));
-                }
+            if (headerValue != null && !validateHeaderValues(headerValue, constraint)) {
+                throw new InvalidHeaderException(MessageFormat.format("Invalid value format for header {0}.", headerName));
             }
         }
     }
