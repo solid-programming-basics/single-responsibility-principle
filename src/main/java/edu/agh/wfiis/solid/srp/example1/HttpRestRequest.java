@@ -19,10 +19,11 @@ public class HttpRestRequest {
     public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
         this.validationConstraints = validationConstraints;
         validateHeaders();
+        setDefaultHeaders(muleMessage);
         return muleMessage;
     }
 
-    private MuleMessage setDefaultHeaders(MuleMessage muleMessage) {
+    private void setDefaultHeaders(MuleMessage muleMessage) {
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
@@ -32,7 +33,10 @@ public class HttpRestRequest {
             }
         }
 
-        return muleMessage;
+    }
+
+    public boolean validateHeaderValues(String incomingValue, Constraint constraint) {
+        return constraint.getPattern() == null ? true : constraint.getPattern().matches(incomingValue);
     }
 
     private void validateHeaders() throws InvalidHeaderException {
@@ -45,7 +49,7 @@ public class HttpRestRequest {
             }
 
             if (headerValue != null) {
-                if (!constraint.validate(headerValue)) {
+                if (!validateHeaderValues(headerValue, constraint)) {
                     throw new InvalidHeaderException(MessageFormat.format("Invalid value format for header {0}.", headerName));
                 }
             }
