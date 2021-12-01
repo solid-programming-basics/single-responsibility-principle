@@ -25,7 +25,7 @@ public class HttpRestRequest {
 
         isHeaderReq();
         getValue();
-        validateHeader()
+        validateHeader();
         }
         return muleMessage;
     }
@@ -35,13 +35,13 @@ private void isHeaderReq() throws InvalidHeaderException {
             if (headerValue == null && constraint.isHeaderRequired()) {
                 throw new InvalidHeaderException("Required header " + headerName + " not specified");
             }
-}
+    }
 
 private void getValue() throws InvalidHeaderException {
             if (headerValue == null && constraint.getDefaultValue() != null) {
                 muleMessage.setHeader(headerName, constraint.getDefaultValue());
             }
-}
+    }
 
 private void validateHeader() throws InvalidHeaderException {
             if (headerValue != null) {
