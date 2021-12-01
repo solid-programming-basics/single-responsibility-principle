@@ -16,12 +16,15 @@ public class HttpRestRequest {
         this.muleMessage = muleMessage;
     }
 
-    public void validate(Constraints validationConstraints) throws InvalidHeaderException {
+    public void setValidationConstraints(Constraints validationConstraints) {
         this.validationConstraints = validationConstraints;
+    }
+
+    public void validate() throws InvalidHeaderException {
         validateHeaders();
     }
 
-    public void setMissingHeadersToDefault(Constraints validationConstraints) {
+    public void setMissingHeadersToDefault() {
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
