@@ -25,7 +25,10 @@ public class HttpRestRequestTest {
     @org.junit.Test
     public void validate() throws Exception {
         testMessage.setHeader(CONTENT_TYPE_HEADER_NAME, "application/json");
-        new HttpRestRequest(testMessage).validate(VALIDATION_CONTRACT);
+        HttpRestRequest httpRestRequest = new HttpRestRequest(testMessage);
+        httpRestRequest.setValidationConstraints(VALIDATION_CONTRACT);
+        httpRestRequest.setMissingHeadersToDefault();
+        httpRestRequest.validate();
     }
 
     private static Constraints prepareValidationContract() {
