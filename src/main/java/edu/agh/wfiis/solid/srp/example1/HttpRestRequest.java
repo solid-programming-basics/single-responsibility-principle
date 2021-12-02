@@ -16,29 +16,42 @@ public class HttpRestRequest {
         this.muleMessage = muleMessage;
     }
 
-    public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
-        this.validationConstraints = validationConstraints;
-        processHeaders();
-        return muleMessage;
-    }
-
-    private void processHeaders() throws InvalidHeaderException {
+    public Boolean validateHeaders(Constraints validationConstraints){
+        Boolean isHeaderValid = true;
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
-
-            if (headerValue == null && constraint.isHeaderRequired()) {
-                throw new InvalidHeaderException("Required header " + headerName + " not specified");
+            try {
+                validateHeaderExists(headerName, headerValue, constraint);
+            } catch (InvalidHeaderException e){
+                isHeaderValid = false;
+                // log warning
             }
-
+            try {
+                validateHeaderFormat(headerName, headerValue, constraint);
+            } catch (InvalidHeaderException e){
+                isHeaderValid = false;
+                // log warning
+            }
+        }
+        return isHeaderValid;
+    }
+    private void validateHeaderExists(headerName, headerValue, constraint) throws InvalidHeaderException {
+        if (headerValue == null && constraint.isHeaderRequired()) {
+            throw new InvalidHeaderException("Required header " + headerName + " not specified");
+        }
+    }
+    private void validateHeaderFormat(headerName, headerValue, constraint) throws InvalidHeaderException {
+        if (headerValue != null && !constraint.validate(headerValue)) {
+            throw new InvalidHeaderException(MessageFormat.format("Invalid value format for header {0}.", headerName));
+        }
+    }
+    private void setMissingHeaderValues(){
+        for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
+            String headerName = constraint.getHeaderName();
+            String headerValue = muleMessage.getHeader(headerName);
             if (headerValue == null && constraint.getDefaultValue() != null) {
                 muleMessage.setHeader(headerName, constraint.getDefaultValue());
-            }
-
-            if (headerValue != null) {
-                if (!constraint.validate(headerValue)) {
-                    throw new InvalidHeaderException(MessageFormat.format("Invalid value format for header {0}.", headerName));
-                }
             }
         }
     }
