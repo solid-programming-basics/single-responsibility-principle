@@ -3,7 +3,6 @@ package edu.agh.wfiis.solid.srp.example1;
 import edu.agh.wfiis.solid.srp.example1.model.*;
 import edu.agh.wfiis.solid.srp.example1.model.ConstraintViolation;
 import edu.agh.wfiis.solid.srp.example1.model.Constraints;
-import edu.agh.wfiis.solid.srp.example1.model.InvalidHeaderException;
 import edu.agh.wfiis.solid.srp.example1.model.Validator;
 
 import java.util.List;
