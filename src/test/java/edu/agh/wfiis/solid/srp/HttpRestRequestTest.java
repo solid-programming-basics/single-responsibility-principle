@@ -2,9 +2,7 @@ package edu.agh.wfiis.solid.srp;
 
 
 import edu.agh.wfiis.solid.srp.example1.HttpRestRequest;
-import edu.agh.wfiis.solid.srp.example1.model.Constraint;
-import edu.agh.wfiis.solid.srp.example1.model.Constraints;
-import edu.agh.wfiis.solid.srp.example1.model.MuleMessage;
+import edu.agh.wfiis.solid.srp.example1.model.*;
 
 import java.util.ArrayList;
 
@@ -24,8 +22,10 @@ public class HttpRestRequestTest {
 
     @org.junit.Test
     public void validate() throws Exception {
-        testMessage.setHeader(CONTENT_TYPE_HEADER_NAME, "application/json");
-        new HttpRestRequest(testMessage).validate(VALIDATION_CONTRACT);
+        testMessage.setHeader(ACCEPT_HEADER_NAME, "application/json");
+        HttpRestRequest httpRestRequest = new HttpRestRequest(testMessage);
+        HeadersValidationResult result = httpRestRequest.validateHeaders(VALIDATION_CONTRACT);
+        org.junit.Assert.assertTrue(result.isValid());
     }
 
     private static Constraints prepareValidationContract() {
