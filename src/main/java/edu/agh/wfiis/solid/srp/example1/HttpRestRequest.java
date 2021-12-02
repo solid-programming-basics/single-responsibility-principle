@@ -15,7 +15,7 @@ public class HttpRestRequest {
         this.muleMessage = muleMessage;
     }
 
-    public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
+    public MuleMessage validateHeaders(Constraints validationConstraints) throws InvalidHeaderException {
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
