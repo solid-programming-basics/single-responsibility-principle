@@ -16,34 +16,20 @@ public class HttpRestRequest {
         this.muleMessage = muleMessage;
     }
 
-    public Boolean validateHeaders(Constraints validationConstraints){
-        Boolean isHeaderValid = true;
+    public void validateHeaders(Constraints validationConstraints) throws InvalidHeaderException{
+        List<String> errors = new ArrayList<>();
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
-            try {
-                validateHeaderExists(headerName, headerValue, constraint);
-            } catch (InvalidHeaderException e){
-                isHeaderValid = false;
-                // log warning
+            if (headerValue == null && constraint.isHeaderRequired()) {
+                errors.add("Required header " + headerName + " not specified");
             }
-            try {
-                validateHeaderFormat(headerName, headerValue, constraint);
-            } catch (InvalidHeaderException e){
-                isHeaderValid = false;
-                // log warning
+            if (headerValue != null && !constraint.validate(headerValue)) {
+                errors.add(MessageFormat.format("Invalid value format for header {0}.", headerName));
             }
         }
-        return isHeaderValid;
-    }
-    private void validateHeaderExists(headerName, headerValue, constraint) throws InvalidHeaderException {
-        if (headerValue == null && constraint.isHeaderRequired()) {
-            throw new InvalidHeaderException("Required header " + headerName + " not specified");
-        }
-    }
-    private void validateHeaderFormat(headerName, headerValue, constraint) throws InvalidHeaderException {
-        if (headerValue != null && !constraint.validate(headerValue)) {
-            throw new InvalidHeaderException(MessageFormat.format("Invalid value format for header {0}.", headerName));
+        if (!errors.empty()){
+            throw new InvalidHeaderException(String.join("\n", errors));
         }
     }
     private void setMissingHeaderValues(){
