@@ -3,6 +3,7 @@ package edu.agh.wfiis.solid.srp;
 
 import edu.agh.wfiis.solid.srp.example1.HttpRestRequest;
 import edu.agh.wfiis.solid.srp.example1.model.Constraint;
+import edu.agh.wfiis.solid.srp.example1.model.ConstraintViolationException;
 import edu.agh.wfiis.solid.srp.example1.model.Constraints;
 import edu.agh.wfiis.solid.srp.example1.model.MuleMessage;
 
@@ -23,7 +24,7 @@ public class HttpRestRequestTest {
     }
 
     @org.junit.Test
-    public void validate() throws Exception {
+    public void validate() throws ConstraintViolationException {
         testMessage.setHeader(CONTENT_TYPE_HEADER_NAME, "application/json");
         new HttpRestRequest(testMessage).validate(VALIDATION_CONTRACT);
     }

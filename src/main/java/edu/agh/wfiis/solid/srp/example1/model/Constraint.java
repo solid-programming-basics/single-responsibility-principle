@@ -6,16 +6,10 @@ public class Constraint {
 
     private String pattern;
 
-    private String defaultValue;
-
     private String name;
 
     public boolean validate(String incomingValue) {
-        return pattern == null ? true : pattern.matches(incomingValue);
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
+        return pattern == null || pattern.matches(incomingValue);
     }
 
     public String getHeaderName() {
