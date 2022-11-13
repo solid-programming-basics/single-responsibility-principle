@@ -10,10 +10,15 @@ public class Constraint {
 
     private String name;
 
-    public boolean validate(String incomingValue) {
-        return pattern == null ? true : pattern.matches(incomingValue);
-    }
+    // public boolean validate(String incomingValue) {
+    //     return pattern == null ? true : pattern.matches(incomingValue);
+    // }
 
+    public String getHeaderPattern()
+    {
+        return pattern;
+    }
+    
     public String getDefaultValue() {
         return defaultValue;
     }
