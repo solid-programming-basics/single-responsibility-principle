@@ -8,6 +8,8 @@ import edu.agh.wfiis.solid.srp.example1.model.RestRequestHeader;
 import edu.agh.wfiis.solid.srp.example1.model.InvalidHeaderException;
 import edu.agh.wfiis.solid.srp.example1.model.MuleMessage;
 
+import java.util.Optional;
+
 public class HttpRestRequest {
 
     protected MuleMessage muleMessage;
@@ -48,9 +50,13 @@ public class HttpRestRequest {
     }
 
     private void addHeader(Header header) {
-        if (header.hasOnlyDefaultValue()) {
-            Constraint constraint = header.getConstraint();
-            muleMessage.setHeader(constraint.getHeaderName(), constraint.getDefaultValue());
-        }
+        Optional.ofNullable(header)
+                .filter(Header::hasOnlyDefaultValue)
+                .ifPresent(this::setMuleMessageHeader);
+    }
+
+    private void setMuleMessageHeader(Header header) {
+        Constraint constraint = header.getConstraint();
+        muleMessage.setHeader(constraint.getHeaderName(), constraint.getDefaultValue());
     }
 }
