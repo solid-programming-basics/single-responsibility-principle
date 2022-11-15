@@ -2,44 +2,55 @@ package edu.agh.wfiis.solid.srp.example1;
 
 import edu.agh.wfiis.solid.srp.example1.model.Constraint;
 import edu.agh.wfiis.solid.srp.example1.model.Constraints;
+import edu.agh.wfiis.solid.srp.example1.model.Header;
+import edu.agh.wfiis.solid.srp.example1.validator.HeaderValidator;
+import edu.agh.wfiis.solid.srp.example1.model.RestRequestHeader;
 import edu.agh.wfiis.solid.srp.example1.model.InvalidHeaderException;
 import edu.agh.wfiis.solid.srp.example1.model.MuleMessage;
-
-import java.text.MessageFormat;
 
 public class HttpRestRequest {
 
     protected MuleMessage muleMessage;
-    protected Constraints validationConstraints;
 
     public HttpRestRequest(MuleMessage muleMessage) {
         this.muleMessage = muleMessage;
     }
 
-    public MuleMessage validate(Constraints validationConstraints) throws InvalidHeaderException {
-        this.validationConstraints = validationConstraints;
-        processHeaders();
+    public MuleMessage getMuleMessage(Constraints validationConstraints) throws InvalidHeaderException {
+        return buildMuleMessage(validationConstraints);
+    }
+
+    private MuleMessage buildMuleMessage(Constraints validationConstraints) throws InvalidHeaderException {
+        for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
+            addPropertyToMuleMessage(constraint);
+        }
         return muleMessage;
     }
 
-    private void processHeaders() throws InvalidHeaderException {
-        for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
-            String headerName = constraint.getHeaderName();
-            String headerValue = muleMessage.getHeader(headerName);
+    private void addPropertyToMuleMessage(Constraint constraint) throws InvalidHeaderException {
+        Header header = buildValidHeader(constraint);
+        addHeader(header);
+    }
 
-            if (headerValue == null && constraint.isHeaderRequired()) {
-                throw new InvalidHeaderException("Required header " + headerName + " not specified");
-            }
+    private Header buildValidHeader(Constraint constraint) throws InvalidHeaderException {
+        Header header = buildRestRequestHeader(constraint);
+        HeaderValidator.validate(header);
+        return header;
+    }
 
-            if (headerValue == null && constraint.getDefaultValue() != null) {
-                muleMessage.setHeader(headerName, constraint.getDefaultValue());
-            }
+    private Header buildRestRequestHeader(Constraint constraint) {
+        String headerName = constraint.getHeaderName();
+        String headerValue = muleMessage.getHeader(headerName);
+        return RestRequestHeader.builder()
+                .constraint(constraint)
+                .value(headerValue)
+                .build();
+    }
 
-            if (headerValue != null) {
-                if (!constraint.validate(headerValue)) {
-                    throw new InvalidHeaderException(MessageFormat.format("Invalid value format for header {0}.", headerName));
-                }
-            }
+    private void addHeader(Header header) {
+        if (header.hasOnlyDefaultValue()) {
+            Constraint constraint = header.getConstraint();
+            muleMessage.setHeader(constraint.getHeaderName(), constraint.getDefaultValue());
         }
     }
 }
