@@ -1,4 +1,4 @@
-package edu.agh.wfiis.solid.srp.model;
+package edu.agh.wfiis.solid.srp.validator;
 
 import edu.agh.wfiis.solid.srp.example1.model.Constraint;
 import edu.agh.wfiis.solid.srp.example1.model.Header;
