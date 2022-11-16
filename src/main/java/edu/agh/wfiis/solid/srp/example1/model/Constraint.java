@@ -22,6 +22,10 @@ public class Constraint {
         return name;
     }
 
+    public String getPattern() {
+        return pattern;
+    }
+
     public boolean isHeaderRequired() {
         return required;
     }
