@@ -19,10 +19,6 @@ public class HttpRestRequest {
     }
 
     public MuleMessage getMuleMessage(Constraints validationConstraints) throws InvalidHeaderException {
-        return buildMuleMessage(validationConstraints);
-    }
-
-    private MuleMessage buildMuleMessage(Constraints validationConstraints) throws InvalidHeaderException {
         for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
             addPropertyToMuleMessage(constraint);
         }

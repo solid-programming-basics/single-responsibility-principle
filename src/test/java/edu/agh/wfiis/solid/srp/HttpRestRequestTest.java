@@ -23,7 +23,7 @@ public class HttpRestRequestTest {
     }
 
     @org.junit.Test
-    public void validate() throws Exception {
+    public void shouldReturnMuleMessage() throws Exception {
         testMessage.setHeader(CONTENT_TYPE_HEADER_NAME, "application/json");
         new HttpRestRequest(testMessage).getMuleMessage(VALIDATION_CONTRACT);
     }
