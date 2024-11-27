@@ -1,6 +1,7 @@
 package edu.agh.wfiis.solid.srp.task1;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 public class HttpRestRequest {
@@ -29,5 +30,21 @@ public class HttpRestRequest {
             }
         }
         return muleMessage;
+    }
+
+    private List<Constraint> validateHeader(String headerName, String headerValue, List<Constraint> constraints) {
+        List<Constraint> unfulfilledConstraints = new ArrayList<>();
+
+        for (Constraint constraint : constraints) {
+            if (headerValue == null && constraint.isHeaderRequired()) {
+                unfulfilledConstraints.add(constraint);
+            }
+
+            if (headerValue != null && !constraint.validate(headerValue)) {
+                unfulfilledConstraints.add(constraint);
+            }
+        }
+
+        return unfulfilledConstraints;
     }
 }
