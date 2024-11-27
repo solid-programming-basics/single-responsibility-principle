@@ -1,14 +1,15 @@
 package edu.agh.wfiis.solid.srp.task1;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 public class HttpRestRequest {
 
     public HttpRestRequest() {
     }
 
-    public MuleMessage process(MuleMessage muleMessage, Constraints validationConstraints) throws InvalidHeaderException {
-        for (Constraint constraint : validationConstraints.getHeaderConstraints()) {
+    public MuleMessage process(MuleMessage muleMessage, List<Constraint> validationConstraints) throws InvalidHeaderException {
+        for (Constraint constraint : validationConstraints) {
             String headerName = constraint.getHeaderName();
             String headerValue = muleMessage.getHeader(headerName);
 
