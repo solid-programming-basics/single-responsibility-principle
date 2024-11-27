@@ -10,14 +10,13 @@ class HttpRestRequestTest extends Specification {
 
     MuleMessage muleMessage = Mock()
     Constraint constraint = Mock()
-    List<Constraint> constraints = new ArrayList<>();
+    List<Constraint> constraints = List.of(constraint)
 
     def setup() {
         underTest = new HttpRestRequest()
 
         constraint.getHeaderName() >> HEADER_NAME
         constraint.validate("defaultValue") >> true
-        constraints >> [constraint]
     }
 
     def "should process headers when header is valid"() {
