@@ -17,4 +17,10 @@ public class MuleMessage {
         }
         inboundProperties.put(headerName, value);
     }
+
+    public MuleMessage copy(){
+        MuleMessage copy = new MuleMessage();
+        copy.inboundProperties = new HashMap<>(this.inboundProperties);
+        return copy;
+    }
 }
