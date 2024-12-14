@@ -36,9 +36,8 @@ class HttpRestRequestTest extends Specification {
     def "should set default value when required header is missing"() {
         given: "required header is missing in request"
         constraint.isHeaderRequired() >> true
-        def muleMessage = Mock(MuleMessage) {
-            1 * getHeader(HEADER_NAME) >> null >> "defaultValue"
-        }
+        muleMessage.getHeader(HEADER_NAME) >> null >> "defaultValue"
+
         and: "default value for this header is defined"
         constraint.getDefaultValue() >> "defaultValue"
 
