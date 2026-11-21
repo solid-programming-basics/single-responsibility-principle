@@ -17,15 +17,7 @@ public class HttpRestRequest {
                 muleMessage.setHeader(headerName, headerValue);
             }
 
-            if (headerValue == null && constraint.isHeaderRequired()) {
-                throw new InvalidHeaderException("Required header " + headerName + " not specified");
-            }
-
-            if (headerValue != null && !constraint.validate(headerValue)) {
-                throw new InvalidHeaderException(
-                        MessageFormat.format("Invalid value format for header {0}.", headerName)
-                );
-            }
+            ContraintValidator.validateForHttpReq(headerValue, constraint);
         }
         return muleMessage;
     }

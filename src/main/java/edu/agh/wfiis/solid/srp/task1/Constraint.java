@@ -3,11 +3,8 @@ package edu.agh.wfiis.solid.srp.task1;
 class Constraint {
 
     private final boolean required;
-
     private final String pattern;
-
     private final String defaultValue;
-
     private final String name;
 
     Constraint(boolean required, String pattern, String defaultValue, String name) {
