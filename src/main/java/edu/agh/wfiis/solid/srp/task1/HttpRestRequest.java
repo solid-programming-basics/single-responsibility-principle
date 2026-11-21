@@ -1,7 +1,5 @@
 package edu.agh.wfiis.solid.srp.task1;
 
-import java.text.MessageFormat;
-
 public class HttpRestRequest {
 
     public HttpRestRequest() {
