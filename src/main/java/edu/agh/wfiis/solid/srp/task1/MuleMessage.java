@@ -5,10 +5,10 @@ import java.util.Map;
 
 public class MuleMessage {
 
-    private Map<String, Object> inboundProperties;
+    private Map<String, String> inboundProperties;
 
     public String getHeader(String headerName) {
-        return (String) inboundProperties.get(headerName);
+        return inboundProperties.get(headerName);
     }
 
     public void setHeader(String headerName, String value) {

@@ -8,17 +8,17 @@ class Constraint {
 
     private final String defaultValue;
 
-    private final String name;
+    private final String headerName;
 
-    Constraint(boolean required, String pattern, String defaultValue, String name) {
+    Constraint(boolean required, String pattern, String defaultValue, String headerName) {
         this.required = required;
         this.pattern = pattern;
         this.defaultValue = defaultValue;
-        this.name = name;
+        this.headerName = headerName;
     }
 
     public boolean validate(String incomingValue) {
-        return pattern == null ? true : pattern.matches(incomingValue);
+        return pattern == null || pattern.matches(incomingValue);
     }
 
     public String getDefaultValue() {
@@ -26,7 +26,7 @@ class Constraint {
     }
 
     public String getHeaderName() {
-        return name;
+        return headerName;
     }
 
     public boolean isHeaderRequired() {

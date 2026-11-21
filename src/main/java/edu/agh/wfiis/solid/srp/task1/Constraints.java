@@ -5,13 +5,13 @@ import java.util.List;
 
 public class Constraints {
 
-    private List<Constraint> headersConstraints = new ArrayList<>();
+    private final List<Constraint> headerConstraints = new ArrayList<>();
 
     List<Constraint> getHeaderConstraints() {
-        return headersConstraints;
+        return headerConstraints;
     }
 
     void add(List<Constraint> constraints) {
-        headersConstraints.addAll(constraints);
+        headerConstraints.addAll(constraints);
     }
 }

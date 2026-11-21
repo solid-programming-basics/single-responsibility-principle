@@ -29,6 +29,7 @@ class HttpRestRequestTest extends Specification {
         def result = underTest.process(muleMessage, constraints)
 
         then: "operation completes successfully"
+        result.is(muleMessage)
     }
 
     def "should set default value when required header is missing"() {
@@ -43,6 +44,7 @@ class HttpRestRequestTest extends Specification {
         def result = underTest.process(muleMessage, constraints)
 
         then: "header is set to default value"
+        result.is(muleMessage)
         1 * muleMessage.setHeader(HEADER_NAME, "defaultValue")
     }
 
