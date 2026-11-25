@@ -5,16 +5,13 @@ import java.util.Map;
 
 public class MuleMessage {
 
-    private Map<String, Object> inboundProperties;
+    private final Map<String, Object> inboundProperties = new HashMap<>();
 
     public String getHeader(String headerName) {
         return (String) inboundProperties.get(headerName);
     }
 
     public void setHeader(String headerName, String value) {
-        if (inboundProperties == null) {
-            inboundProperties = new HashMap<>();
-        }
         inboundProperties.put(headerName, value);
     }
 }
